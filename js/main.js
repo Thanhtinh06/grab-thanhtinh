@@ -1,51 +1,97 @@
-function priceOfUber(name){
-  var openPrice,under20kmPrice,over20kmPrice, waitPrice;
-  if (name == "grabCar") {
-    openPrice = 8000;
-    under20kmPrice = 12000;
-    over20kmPrice = 10000;
-    waitPrice = 2000;
-  }else if(name = "grabSUV"){
-    openPrice = 9000;
-    under20kmPrice = 14000;
-    over20kmPrice = 12000;
-    waitPrice = 3000;
-  }else if(name = "grabBlack"){
-    openPrice = 10000;
-    under20kmPrice = 16000;
-    over20kmPrice = 14000;
-    waitPrice = 4000;
+class Car {
+  constructor(modelCar,priceOfOneKm,priceUnder20km,priceOver20km,priceWait){
+    this.modelCar = modelCar;
+    this.priceOfOneKm = priceOfOneKm;
+    this.priceUnder20km = priceUnder20km;
+    this.priceOver20km = priceOver20km;
+    this.priceWait = priceWait;
+    this.distance = 20;
   }
-  var listPrice = [openPrice,under20kmPrice,over20kmPrice,waitPrice];
-  return listPrice;
+  calculateAmountKmUnder20(amountKm) {
+    return amountKm - 1
+  }
+
+  calculateAmountKmOver20(amountKm) {
+    return amountKm - this.distance
+  }
+
+  calculatePriceUnder20(amountKm) {
+    return this.calculateAmountKmUnder20(amountKm) * this.priceUnder20km
+  }
+
+  calculatePriceOver20(amountKm) {
+    return this.calculateAmountKmUnder20(amountKm) * this.priceOver20km
+  }
+
+  calculateTotalPriceWait(timeWait) {
+    return this.priceWait * timeWait
+  }
+
+  calculateTotalPrice(timeWait,amountKm) {
+    let totalPrice;
+    totalPrice = this.calculateTotalPriceWait(timeWait) + this.priceOfOneKm;
+    if (amountKm > 0 && amountKm <= 1) {
+          return totalPrice;
+    }else if ( amountKm > 1 && amountKm <= this.distance) {
+      totalPrice += this.calculatePriceUnder20(amountKm) ;
+    }else{
+      totalPrice += this.calculatePriceUnder20(amountKm) + this.calculatePriceOver20(amountKm);
+    }
+    return totalPrice;
+  }
 }
 
-function calculatePrice (amountKm,typeUber,timeWait){
-  listPrice = priceOfUber(typeUber);
-  var totalPrice = timeWait * listPrice[3] + listPrice[0];
-  var distance = 20;
+const grabCar = new Car("grabCar",8000,12000,10000,2000);
+const grabSUV = new Car("grabSUV",9000,14000,12000,3000);
+const grabBlack = new Car("grabBlack",10000,16000,14000,4000);
 
-  if (amountKm > 0 && amountKm <= 1) {
-    return totalPrice;
-  }else if ( amountKm > 1 && amountKm <= distance) {
-    totalPrice += listPrice[1] * (amountKm - 1); 
-  }else{
-    totalPrice += listPrice[1] * (distance - 1) + (amountKm - distance) * listPrice[2];
+function checkTypeCar() {
+  var valueCar;
+  if (document.querySelector('input[id="grabCar"]:checked') != null) {
+    valueCar = grabCar;
+  }else if(document.querySelector('input[id="grabSUV"]:checked') != null) {
+    valueCar = grabSUV;
+  } else if(document.querySelector('input[id="grabBlack"]:checked') != null) {
+    valueCar = grabBlack;
+  }else {
+    valueCar = null;
   }
-  return totalPrice;
+  return valueCar;
 }
 
 document.getElementById("tinhTien").onclick = function () {
-  var amountKm = 10;
-  var typeUber = "grabCar";
-  var timeWait = 2;
-  totalPrice = calculatePrice(amountKm,typeUber,timeWait);
-  if(typeUber != null) {
-    document.getElementById("xuatTien").innerHTML = totalPrice;
-    document.getElementById("xuatTien").style.display = "block";
-    console.log(document.getElementById("xuatTien").value);
+  var car = checkTypeCar();
+  var amountKm = document.getElementById("soKm").value;
+  var timeWait = document.getElementById("time").value;
+  if (car == null) {
+    alert('Vui lòng chọn loại xe: ')
+  }else {
+    totalPrice = car.calculateTotalPrice(timeWait ,amountKm);
+    document.getElementById('xuatTien').innerHTML = totalPrice;
+    document.getElementById("divThanhTien").style.display = "block";
   }
-  else {
-    alert('Vui long chon xe');
+}
+
+document.getElementById("inHoaDon").onclick = function () { 
+  var car = checkTypeCar();
+  var amountKm = document.getElementById("soKm").value;
+  var timeWait = document.getElementById("time").value;
+  if (car == null) {
+    alert('Vui lòng chọn loại xe: ');
+  }else{
+    totalPrice = car.calculateTotalPrice(timeWait ,amountKm);
+    document.getElementById('xuatTien').innerHTML = totalPrice;
+    document.getElementById("divThanhTien").style.display = "block";
+    document.getElementById('typeCar').innerHTML = car.modelCar;
+    document.getElementById('modelCar').innerHTML = car.modelCar;
+    document.getElementById('totalPrice').innerHTML = totalPrice;
+    document.getElementById('oneKm').innerHTML = car.priceOfOneKm;
+    document.getElementById('priceOne').innerHTML = car.priceOfOneKm;
+    document.getElementById('totalKm').innerHTML = car.calculateAmountKmUnder20(amountKm) + 'km';
+    document.getElementById('priceKm').innerHTML = car.priceUnder20km;
+    document.getElementById('priceMoreKm').innerHTML = car.calculatePriceUnder20(amountKm);
+    document.getElementById('timeWait').innerHTML = timeWait;
+    document.getElementById('costWait').innerHTML = car.priceWait;
+    document.getElementById('priceWait').innerHTML = car.calculateTotalPriceWait(timeWait);
   }
 }
